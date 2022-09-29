@@ -22,11 +22,11 @@ export class Game {
   @Prop({ required: false })
   password: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, default: true })
   timer: boolean;
 
-  @Prop({ type: [String], required: true })
-  userList: string[];
+  @Prop({ type: Object, required: true })
+  userList: object;
 
   @Prop({ type: Object, required: true })
   banpickList: object;
