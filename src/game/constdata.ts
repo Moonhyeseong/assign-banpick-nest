@@ -24,6 +24,7 @@ export const turnData: Turn[] = [
 ];
 
 export const ROLEDATA = {
+  solo: 0,
   TOP: 0,
   JUNGLE: 1,
   MID: 2,

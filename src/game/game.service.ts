@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Document } from 'mongoose';
 import { CreateGameDto } from './dto/create-game.dto';
+import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { Game } from './schema/game.schema';
+import { ROLEDATA } from './constdata';
 
 @Injectable()
 export class GameService {
@@ -66,8 +68,37 @@ export class GameService {
   }
 
   //유저 리스트 업데이트
-  updateUserList(id: string) {
-    return `유저 리스트 업데이트 ${id}`;
+  async updateUserList(createUserDto: CreateUserDto) {
+    const { gameId, userId, name, side, role, isReady } = createUserDto;
+
+    const updatedData = await this.gameModel
+      .findById({ _id: gameId }, (err, result) => {
+        if (err) throw err;
+        const getUpdatedUserList = () => {
+          const updatedUserList = result.userList;
+          updatedUserList[side][ROLEDATA[role]] = {
+            gameId: gameId,
+            userId: userId,
+            name: name,
+            side: side,
+            role: role,
+            isReady: isReady,
+            isOnline: true,
+          };
+          return updatedUserList;
+        };
+
+        return this.gameModel.findByIdAndUpdate(
+          { _id: gameId },
+          { userList: getUpdatedUserList() },
+          { new: true },
+          (err, result) => {
+            return result;
+          },
+        );
+      })
+      .clone();
+    return updatedData;
   }
 
   //밴픽 리스트 업데이트

@@ -9,6 +9,7 @@ import {
   Delete,
 } from '@nestjs/common';
 import { GameService } from './game.service';
+import { CreateUserDto } from 'src/user/dto/create-user.dto';
 
 @Controller('game')
 export class GameController {
@@ -40,9 +41,9 @@ export class GameController {
   }
 
   //유저리스트 업데이트
-  @Patch(':id')
-  updateUserList(@Param('id') id: string) {
-    return this.gameService.updateUserList(id);
+  @Patch('/join')
+  updateUserList(@Body() createUserDto: CreateUserDto) {
+    return this.gameService.updateUserList(createUserDto);
   }
 
   //밴픽 리스트 업데이트

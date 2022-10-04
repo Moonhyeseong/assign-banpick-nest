@@ -1,4 +1,3 @@
-import { Game } from './../game/schema/game.schema';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -9,7 +8,6 @@ import { User } from './schema/user.shcema';
 export class UserService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<User>,
-    @InjectModel(Game.name) private readonly gameModel: Model<Game>,
   ) {}
 
   async createUser(createUserDto: CreateUserDto): Promise<User> {
