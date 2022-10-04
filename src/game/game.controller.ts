@@ -16,8 +16,9 @@ export class GameController {
 
   //게임 생성
   @Post()
-  create(@Body() createGameDto: CreateGameDto) {
-    return this.gameService.create(createGameDto);
+  async createGame(@Body() createGameDto: CreateGameDto) {
+    const result = await this.gameService.createGame(createGameDto);
+    return result;
   }
 
   //게임 리스트 전송

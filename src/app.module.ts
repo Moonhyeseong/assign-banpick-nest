@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { UserModule } from './user/user.module';
 import { GameModule } from './game/game.module';
 import { MongooseModule } from '@nestjs/mongoose';
 
@@ -12,6 +13,7 @@ import { MongooseModule } from '@nestjs/mongoose';
       },
     ),
     GameModule,
+    UserModule,
   ],
 })
 export class AppModule {}

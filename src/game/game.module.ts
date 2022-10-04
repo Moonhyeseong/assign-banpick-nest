@@ -8,7 +8,6 @@ import { GameController } from './game.controller';
   imports: [
     MongooseModule.forFeature([{ name: Game.name, schema: GameSchema }]),
   ],
-
   controllers: [GameController],
   providers: [GameService],
 })

@@ -22,3 +22,11 @@ export const turnData: Turn[] = [
   { phase: 'pick', side: 'blue', role: 'SUPPORT' },
   { phase: 'pick', side: 'red', role: 'SUPPORT' },
 ];
+
+export const ROLEDATA = {
+  TOP: 0,
+  JUNGLE: 1,
+  MID: 2,
+  ADC: 3,
+  SUPPORT: 4,
+};

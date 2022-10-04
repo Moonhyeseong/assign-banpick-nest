@@ -11,9 +11,14 @@ export class GameService {
   ) {}
 
   //게임 생성
-  create(createGameDto: CreateGameDto) {
+  async createGame(createGameDto: CreateGameDto): Promise<Game> {
     const initialUserList = (mode: number) => {
-      if (mode === 1 || mode === 0) {
+      if (mode === 0) {
+        return {
+          blue: ['solo'],
+          red: ['solo'],
+        };
+      } else if (mode === 1) {
         return {
           blue: [''],
           red: [''],
@@ -37,26 +42,22 @@ export class GameService {
       },
     };
 
-    return this.gameModel.create(
-      {
-        title: createGameDto.title,
-        blueTeamName: createGameDto.blueTeamName,
-        redTeamName: createGameDto.redTeamName,
-        mode: createGameDto.mode,
-        timer: createGameDto.timer,
-        userList: initialUserList(createGameDto.mode),
-        banpickList: initialBanPickList,
-        isProceeding: createGameDto.isProceeding,
-      },
-      () => {
-        console.log('게임 생성');
-      },
-    );
+    return await new this.gameModel({
+      title: createGameDto.title,
+      blueTeamName: createGameDto.blueTeamName,
+      redTeamName: createGameDto.redTeamName,
+      mode: createGameDto.mode,
+      timer: createGameDto.timer,
+      userList: initialUserList(createGameDto.mode),
+      banpickList: initialBanPickList,
+      isProceeding: createGameDto.isProceeding,
+    }).save();
   }
 
   //게임 전체 리스트
   findAll() {
-    return this.gameModel.find().exec();
+    const gameList = this.gameModel.find().exec();
+    return gameList;
   }
 
   //단일 게임정보
