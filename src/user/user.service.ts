@@ -13,14 +13,6 @@ export class UserService {
   async createUser(createUserDto: CreateUserDto): Promise<User> {
     const { gameId, userId, name, side, role, mode, isReady } = createUserDto;
 
-    // this.gameModel.findByIdAndUpdate(
-    //   { _id: gameId },
-    //   { userList: { solo: userId } },
-    //   (err, result) => {
-    //     console.log(result);
-    //   },
-    // );
-
     return await new this.userModel({
       gameId,
       userId,
@@ -30,5 +22,9 @@ export class UserService {
       mode,
       isReady,
     }).save();
+  }
+
+  async findUser(id: string) {
+    return await this.userModel.findById({ _id: id });
   }
 }

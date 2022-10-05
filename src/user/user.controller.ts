@@ -14,8 +14,9 @@ export class UserController {
   }
 
   @Get()
-  async findUser() {
-    return '유저 정보';
+  async findUser(id: string) {
+    const result = await this.userService.findUser(id);
+    return result;
   }
 
   @Delete()

@@ -1,3 +1,4 @@
+import { UpdateBanPickDto } from './dto/update-banpick.dto';
 import { CreateGameDto } from './dto/create-game.dto';
 import {
   Controller,
@@ -47,8 +48,8 @@ export class GameController {
   }
 
   //밴픽 리스트 업데이트
-  @Patch(':id')
-  updateBanPickList(@Param('id') id: string) {
-    return this.gameService.updateBanPickList(id);
+  @Patch('/banpick')
+  updateBanPickList(@Body() updateBanPickDto: UpdateBanPickDto) {
+    return this.gameService.updateBanPickList(updateBanPickDto);
   }
 }
