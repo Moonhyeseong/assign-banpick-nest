@@ -35,10 +35,22 @@ export class GameController {
     return this.gameService.findOne(id);
   }
 
+  //챔피언 리스트
+  @Get('/champion')
+  getChampionList() {
+    return this.gameService.getChampionList();
+  }
+
+  @Get('/initalGameData/:id')
+  async getInitialGameData(@Param('id') id: string) {
+    const game = await this.gameService.findOne(id);
+    const championList = await this.gameService.getChampionList();
+    return { game, championList };
+  }
   //게임 삭제
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.gameService.remove(id);
+    return this.gameService.removeGame(id);
   }
 
   //유저리스트 업데이트
@@ -51,5 +63,16 @@ export class GameController {
   @Patch('/banpick')
   updateBanPickList(@Body() updateBanPickDto: UpdateBanPickDto) {
     return this.gameService.updateBanPickList(updateBanPickDto);
+  }
+
+  //유저 Ready
+  @Patch('/ready')
+  updateUserReady() {
+    return this.gameService.updateUserReady();
+  }
+
+  @Patch('/start/:id')
+  startGame(@Param('id') id: string) {
+    return this.gameService.removeGame(id);
   }
 }

@@ -1,12 +1,29 @@
+import { Turn } from './interfaces/turn.interface';
 import { UpdateBanPickDto } from './dto/update-banpick.dto';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Date, Model } from 'mongoose';
 import { CreateGameDto } from './dto/create-game.dto';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { Game } from './schema/game.schema';
 import { ROLEDATA } from './constdata';
 import mongoose from 'mongoose';
+
+export interface GameTest {
+  _id: mongoose.Types.ObjectId;
+  title: string;
+  blueTeamName: string;
+  redTeamName: string;
+  mode: number;
+  password: string;
+  timer: boolean;
+  userList: object;
+  banpickList: object;
+  banpickTurnData: Turn[];
+  banpickCount: number;
+  isProceeding: boolean;
+  createdAt: Date;
+}
 
 @Injectable()
 export class GameService {
@@ -66,13 +83,19 @@ export class GameService {
     return gameList;
   }
 
+  async getChampionList() {
+    const res = await fetch(
+      'https://ddragon.leagueoflegends.com/cdn/12.16.1/data/ko_KR/champion.json',
+    );
+    const data = await res.json();
+
+    return data.data;
+  }
+
   //단일 게임정보
   async findOne(id: string) {
     console.log(id);
-
-    const gameId = new mongoose.Types.ObjectId(id);
-    const result = await this.gameModel.findById({ _id: gameId });
-    return result;
+    return await this.gameModel.findById({ _id: id }).exec();
   }
 
   //유저 리스트 업데이트
@@ -80,7 +103,7 @@ export class GameService {
     const { gameId, userId, name, side, role, isReady } = createUserDto;
 
     const updatedData = await this.gameModel
-      .findById({ _id: gameId }, (err, result) => {
+      .findById({ _id: gameId }, (err: Error, result: GameTest) => {
         if (err) throw err;
         const getUpdatedUserList = () => {
           const updatedUserList = result.userList;
@@ -110,46 +133,32 @@ export class GameService {
   }
 
   //밴픽 리스트 업데이트
-  updateBanPickList(updateBanPickDto: UpdateBanPickDto) {
-    const { gameId, banPickList, banpickCount } = updateBanPickDto;
 
-    this.gameModel.findByIdAndUpdate(
-      { _id: gameId },
-      {
-        $set: {
-          banPickList: banPickList,
-          banpickCount: banpickCount + 1,
+  async updateBanPickList(updateBanPickDto: UpdateBanPickDto) {
+    const { gameId, banpickList, banpickCount } = updateBanPickDto;
+
+    const updateGameData = await this.gameModel
+      .findByIdAndUpdate(
+        { _id: gameId },
+        {
+          $set: {
+            banpickList: banpickList,
+            banpickCount: banpickCount + 1,
+          },
         },
-      },
-      { new: true },
-      (err, result) => {
-        return result;
-      },
-    );
+        { new: true },
+      )
+      .exec();
 
-    // return this.gameModel
-    //   .findByIdAndUpdate(
-    //     { _id: gameId },
-    //     {
-    //       $set: {
-    //         banPickList: banPickList,
-    //         banpickCount: banpickCount + 1,
-    //       },
-    //     },
-    //     { new: true },
-    //     (err, result) => {
-    //       return result;
-    //     },
-    //   )
-    //   .clone();
-    return {
-      banPickList: banPickList,
-      banpickCount: banpickCount + 1,
-    };
+    return updateGameData;
+  }
+
+  updateUserReady() {
+    return '유저 준비';
   }
 
   //게임 삭제
-  remove(id: string) {
+  removeGame(id: string) {
     return `게임 삭제 ${id}`;
   }
 }

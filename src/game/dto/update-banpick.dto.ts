@@ -1,5 +1,5 @@
 export class UpdateBanPickDto {
   gameId: string;
-  banPickList: object;
+  banpickList: object;
   banpickCount: number;
 }

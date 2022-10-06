@@ -10,9 +10,9 @@ export class UserService {
     @InjectModel(User.name) private readonly userModel: Model<User>,
   ) {}
 
+  //유저 데이터 추가
   async createUser(createUserDto: CreateUserDto): Promise<User> {
     const { gameId, userId, name, side, role, mode, isReady } = createUserDto;
-
     return await new this.userModel({
       gameId,
       userId,
@@ -24,7 +24,8 @@ export class UserService {
     }).save();
   }
 
+  //유저 정보 전송
   async findUser(id: string) {
-    return await this.userModel.findById({ _id: id });
+    return await this.userModel.findOne({ userId: id });
   }
 }
