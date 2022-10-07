@@ -55,13 +55,13 @@ export class GameService {
     };
 
     const initialBanPickList = {
-      blue: {
-        ban: ['', '', '', '', ''],
-        pick: ['', '', '', '', ''],
+      ban: {
+        blue: ['', '', '', '', ''],
+        red: ['', '', '', '', ''],
       },
-      red: {
-        ban: ['', '', '', '', ''],
-        pick: ['', '', '', '', ''],
+      pick: {
+        blue: ['', '', '', '', ''],
+        red: ['', '', '', '', ''],
       },
     };
 
@@ -83,18 +83,8 @@ export class GameService {
     return gameList;
   }
 
-  async getChampionList() {
-    const res = await fetch(
-      'https://ddragon.leagueoflegends.com/cdn/12.16.1/data/ko_KR/champion.json',
-    );
-    const data = await res.json();
-
-    return data.data;
-  }
-
   //단일 게임정보
   async findOne(id: string) {
-    console.log(id);
     return await this.gameModel.findById({ _id: id }).exec();
   }
 

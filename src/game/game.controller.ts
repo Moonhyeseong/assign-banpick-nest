@@ -35,18 +35,6 @@ export class GameController {
     return this.gameService.findOne(id);
   }
 
-  //챔피언 리스트
-  @Get('/champion')
-  getChampionList() {
-    return this.gameService.getChampionList();
-  }
-
-  @Get('/initalGameData/:id')
-  async getInitialGameData(@Param('id') id: string) {
-    const game = await this.gameService.findOne(id);
-    const championList = await this.gameService.getChampionList();
-    return { game, championList };
-  }
   //게임 삭제
   @Delete(':id')
   remove(@Param('id') id: string) {
