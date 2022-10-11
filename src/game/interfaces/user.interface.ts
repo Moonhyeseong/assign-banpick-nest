@@ -1,8 +1,13 @@
-export interface User {
-  uuid: string;
+import mongoose, { Date } from 'mongoose';
+
+export interface IUser {
+  _id: mongoose.Types.ObjectId;
+  gameId: string;
+  userId: string;
   name: string;
   side: string;
   role: string;
+  mode: number;
   isReady: boolean;
-  isOnline: boolean;
+  createdAt: Date;
 }

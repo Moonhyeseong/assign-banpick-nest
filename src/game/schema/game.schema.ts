@@ -1,4 +1,4 @@
-import { Turn } from './../interfaces/turn.interface';
+import { ITurn } from './../interfaces/turn.interface';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Date, Document } from 'mongoose';
 import { turnData } from '../constdata';
@@ -32,7 +32,7 @@ export class Game {
   banpickList: object;
 
   @Prop({ type: [Object], required: true, default: turnData })
-  banpickTurnData: Turn[];
+  banpickTurnData: ITurn[];
 
   @Prop({ required: true, default: 0 })
   banpickCount: number;

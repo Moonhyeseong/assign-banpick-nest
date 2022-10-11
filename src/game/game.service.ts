@@ -1,35 +1,24 @@
-import { Turn } from './interfaces/turn.interface';
-import { UpdateBanPickDto } from './dto/update-banpick.dto';
 import { Injectable } from '@nestjs/common';
+import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { Date, Model } from 'mongoose';
+import { IGame } from './interfaces/game.interface';
 import { CreateGameDto } from './dto/create-game.dto';
+import { UpdateBanPickDto } from './dto/update-banpick.dto';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { Game } from './schema/game.schema';
 import { ROLEDATA } from './constdata';
-import mongoose from 'mongoose';
-
-export interface GameTest {
-  _id: mongoose.Types.ObjectId;
-  title: string;
-  blueTeamName: string;
-  redTeamName: string;
-  mode: number;
-  password: string;
-  timer: boolean;
-  userList: object;
-  banpickList: object;
-  banpickTurnData: Turn[];
-  banpickCount: number;
-  isProceeding: boolean;
-  createdAt: Date;
-}
 
 @Injectable()
 export class GameService {
   constructor(
     @InjectModel(Game.name) private readonly gameModel: Model<Game>,
   ) {}
+
+  //게임 전체 리스트
+  findAll() {
+    const gameList = this.gameModel.find().sort({ createdAt: -1 }).exec();
+    return gameList;
+  }
 
   //게임 생성
   async createGame(createGameDto: CreateGameDto): Promise<Game> {
@@ -77,12 +66,6 @@ export class GameService {
     }).save();
   }
 
-  //게임 전체 리스트
-  findAll() {
-    const gameList = this.gameModel.find().exec();
-    return gameList;
-  }
-
   //단일 게임정보
   async findOne(id: string) {
     return await this.gameModel.findById({ _id: id }).exec();
@@ -93,7 +76,7 @@ export class GameService {
     const { gameId, userId, name, side, role, isReady } = createUserDto;
 
     const updatedData = await this.gameModel
-      .findById({ _id: gameId }, (err: Error, result: GameTest) => {
+      .findById({ _id: gameId }, (err: Error, result: IGame) => {
         if (err) throw err;
         const getUpdatedUserList = () => {
           const updatedUserList = result.userList;

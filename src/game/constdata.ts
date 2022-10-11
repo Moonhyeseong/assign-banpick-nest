@@ -1,6 +1,6 @@
-import { Turn } from './interfaces/turn.interface';
+import { ITurn } from './interfaces/turn.interface';
 
-export const turnData: Turn[] = [
+export const turnData: ITurn[] = [
   { phase: 'ban', side: 'blue', role: 'TOP' },
   { phase: 'ban', side: 'red', role: 'TOP' },
   { phase: 'ban', side: 'blue', role: 'TOP' },

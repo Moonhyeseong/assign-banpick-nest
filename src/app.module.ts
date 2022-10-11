@@ -1,3 +1,5 @@
+// import { EventsGateway } from './events/events.gateway';
+import { EventsModule } from './events/events.module';
 import { Module } from '@nestjs/common';
 import { UserModule } from './user/user.module';
 import { GameModule } from './game/game.module';
@@ -14,6 +16,7 @@ import { MongooseModule } from '@nestjs/mongoose';
     ),
     GameModule,
     UserModule,
+    EventsModule,
   ],
 })
 export class AppModule {}
