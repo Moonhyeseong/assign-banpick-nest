@@ -5,8 +5,10 @@ import {
   WebSocketGateway,
   MessageBody,
   WebSocketServer,
+  ConnectedSocket,
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
+import { Socket } from 'socket.io';
 import { Model } from 'mongoose';
 import { Game } from 'src/game/schema/game.schema';
 import { User } from 'src/user/schema/user.shcema';
@@ -38,10 +40,20 @@ export class EventsGateway {
     this.server.emit('updateGameList');
   }
 
-  @SubscribeMessage('userJoin')
-  handleUserJoin(@MessageBody() gameId: string) {
-    this.server.emit('updateGameData', gameId);
+  @SubscribeMessage('userJoinGame')
+  handleUserJoin(
+    @MessageBody() gameId: string,
+    @ConnectedSocket() client: Socket,
+  ) {
+    console.log('게임에 참여했습니다');
+
+    client.join(gameId);
+  }
+
+  @SubscribeMessage('userJoinWatingRoom')
+  handleUserJoinWatingRoom(@MessageBody() gameId: string) {
     this.server.emit('updateGameList');
+    this.server.in(gameId).emit('updateGameData', gameId);
   }
 
   @SubscribeMessage('userReadyEvent')
@@ -81,6 +93,6 @@ export class EventsGateway {
       },
     );
 
-    this.server.emit('updateGameData', gameId);
+    this.server.in(gameId).emit('updateGameData', gameId);
   }
 }
