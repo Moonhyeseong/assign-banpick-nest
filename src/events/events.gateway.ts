@@ -1,5 +1,7 @@
-import { InjectModel } from '@nestjs/mongoose';
+import { Server, Socket } from 'socket.io';
+import { Model } from 'mongoose';
 import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
 import {
   SubscribeMessage,
   WebSocketGateway,
@@ -7,11 +9,9 @@ import {
   WebSocketServer,
   ConnectedSocket,
 } from '@nestjs/websockets';
-import { Server } from 'socket.io';
-import { Socket } from 'socket.io';
-import { Model } from 'mongoose';
 import { Game } from 'src/game/schema/game.schema';
 import { User } from 'src/user/schema/user.shcema';
+import { IGame } from './../game/interfaces/game.interface';
 import { ROLEDATA } from 'src/game/constdata';
 
 @Injectable()
@@ -26,8 +26,11 @@ export class EventsGateway {
   server: Server;
 
   @SubscribeMessage('socket-conncet')
-  async initSocketConnection(@MessageBody() data: string) {
-    this.server.emit('ServerToClient', data);
+  async initSocketConnection(
+    @MessageBody() data: string,
+    @ConnectedSocket() client: Socket,
+  ) {
+    client.join('lobby');
   }
 
   @SubscribeMessage('disconnect')
@@ -37,7 +40,7 @@ export class EventsGateway {
 
   @SubscribeMessage('createGame')
   handleCreateGame() {
-    this.server.emit('updateGameList');
+    this.server.in('lobby').emit('updateGameList');
   }
 
   @SubscribeMessage('userJoinGame')
@@ -45,15 +48,15 @@ export class EventsGateway {
     @MessageBody() gameId: string,
     @ConnectedSocket() client: Socket,
   ) {
-    console.log('게임에 참여했습니다');
-
+    client.leave('lobby');
     client.join(gameId);
   }
 
   @SubscribeMessage('userJoinWatingRoom')
-  handleUserJoinWatingRoom(@MessageBody() gameId: string) {
-    this.server.emit('updateGameList');
-    this.server.in(gameId).emit('updateGameData', gameId);
+  handleUserJoinWatingRoom(@MessageBody() data) {
+    this.server.in(data.gameId).emit('updateGameData', data.gameId);
+    this.server.in('lobby').emit('updateGameList');
+    this.server.in('lobby').emit('updateGameListTest', 'updateGameListTest');
   }
 
   @SubscribeMessage('userReadyEvent')
@@ -62,8 +65,9 @@ export class EventsGateway {
     const userId = data.userId;
 
     //단일 게임 데이터 업데이트
-    this.gameModel.findById({ _id: gameId }, (err, result) => {
+    this.gameModel.findById({ _id: gameId }, (err: object, result: IGame) => {
       if (err) throw err;
+
       const getUpdatedUserList = () => {
         const updatedUserList = result.userList;
 
@@ -80,9 +84,11 @@ export class EventsGateway {
         { new: true },
         (err) => {
           if (err) throw err;
+          this.server.in(gameId).emit('updateGameData', gameId);
         },
       );
     });
+
     //유저 데이터 업데이트
     this.userModel.findOneAndUpdate(
       { userId: userId },
@@ -92,7 +98,18 @@ export class EventsGateway {
         if (err) throw err;
       },
     );
+  }
 
-    this.server.in(gameId).emit('updateGameData', gameId);
+  @SubscribeMessage('startSimulator')
+  handleStartSimulator(@MessageBody() gameId: string) {
+    this.gameModel.findByIdAndUpdate(
+      { _id: gameId },
+      { isProceeding: true },
+      { new: true },
+      (err) => {
+        if (err) throw err;
+        this.server.in(gameId).emit('updateGameData', gameId);
+      },
+    );
   }
 }
