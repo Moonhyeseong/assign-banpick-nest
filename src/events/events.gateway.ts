@@ -112,4 +112,16 @@ export class EventsGateway {
       },
     );
   }
+
+  @SubscribeMessage('banpick')
+  handleBanpick(@MessageBody() gameId: string) {
+    this.server.in(gameId).emit('updateGameData', gameId);
+  }
+
+  @SubscribeMessage('selectChampion')
+  handleSelectChampion(@MessageBody() payload) {
+    const gameId = payload.gameId;
+    const champion = payload.champion;
+    this.server.in(gameId).emit('updateSelectedChampion', champion);
+  }
 }
