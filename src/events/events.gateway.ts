@@ -123,7 +123,73 @@ export class EventsGateway {
 
   @SubscribeMessage('disconnect')
   handleDisconnect(@ConnectedSocket() client: Socket) {
+    const gameId = this.logger[client.id];
+
     //유저가 가지고 있는 클라이언트 id 받음 => 해당 id를 가지고 있는 유저를 유저 리스트에서 삭제
-    this.logger[client.id] && console.log(this.logger[client.id]);
+
+    this.gameModel.findById({ _id: gameId }, (err, result) => {
+      if (result?.isProceeding) {
+        this.server.in(gameId).emit('shutdownSimulator', 'shutdownSimulator');
+        this.gameModel.deleteOne({ _id: gameId }).exec();
+        this.userModel.deleteMany({ gameId: gameId }).exec();
+      }
+
+      const updatedBlueUserListData = [];
+      const updatedRedUserListData = [];
+
+      const blueUserListData = result?.userList.blue;
+      const redUserListData = result?.userList.red;
+
+      blueUserListData?.map((user) => {
+        if (user.clientId === client.id) {
+          updatedBlueUserListData.push('');
+        } else {
+          updatedBlueUserListData.push(user);
+        }
+        return updatedBlueUserListData;
+      });
+
+      redUserListData?.map((user) => {
+        if (user.clientId === client.id) {
+          updatedRedUserListData.push('');
+        } else {
+          updatedRedUserListData.push(user);
+        }
+        return updatedRedUserListData;
+      });
+
+      this.gameModel.findByIdAndUpdate(
+        { _id: gameId },
+        {
+          userList: {
+            blue: updatedBlueUserListData,
+            red: updatedRedUserListData,
+          },
+        },
+        { new: true },
+        (err, result) => {
+          console.log(result);
+
+          //유저이탈후 참가인원 검사
+          // const activeBlueTeamUsers = result?.userList.blue.filter((user) => {
+          //   return user !== '';
+          // });
+          // const activeRedTeamUsers = result?.userList.red.filter((user) => {
+          //   return user !== '';
+          // });
+
+          // if (
+          //   activeBlueTeamUsers?.length === 0 &&
+          //   activeRedTeamUsers?.length === 0
+          // ) {
+          //   this.gameModel.deleteOne({ _id: gameId }).exec();
+          //   this.userModel.deleteMany({ game_id: gameId }).exec();
+          // }
+
+          // this.server.emit('updateGameList', 'updateGameList');
+          // this.server.in(gameId).emit('updateGameData', result);
+        },
+      );
+    });
   }
 }
