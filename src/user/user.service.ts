@@ -12,10 +12,12 @@ export class UserService {
 
   //유저 데이터 추가
   async createUser(createUserDto: CreateUserDto): Promise<User> {
-    const { gameId, userId, name, side, role, mode, isReady } = createUserDto;
+    const { gameId, userId, clientId, name, side, role, mode, isReady } =
+      createUserDto;
     return await new this.userModel({
       gameId,
       userId,
+      clientId,
       name,
       side,
       role,

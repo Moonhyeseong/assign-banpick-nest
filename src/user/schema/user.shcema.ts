@@ -12,6 +12,9 @@ export class User {
   userId: string;
 
   @Prop({ required: true })
+  clientId: string;
+
+  @Prop({ required: true })
   name: string;
 
   @Prop({ required: true })

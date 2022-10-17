@@ -17,6 +17,8 @@ import { ROLEDATA } from 'src/game/constdata';
 @Injectable()
 @WebSocketGateway({ transports: ['websocket'] })
 export class EventsGateway {
+  logger: Map<string, string> = new Map();
+
   constructor(
     @InjectModel(Game.name) private readonly gameModel: Model<Game>,
     @InjectModel(User.name) private readonly userModel: Model<User>,
@@ -26,16 +28,8 @@ export class EventsGateway {
   server: Server;
 
   @SubscribeMessage('socket-conncet')
-  async initSocketConnection(
-    @MessageBody() data: string,
-    @ConnectedSocket() client: Socket,
-  ) {
+  async initSocketConnection(@ConnectedSocket() client: Socket) {
     client.join('lobby');
-  }
-
-  @SubscribeMessage('disconnect')
-  disconncet() {
-    this.server.disconnectSockets();
   }
 
   @SubscribeMessage('createGame')
@@ -50,6 +44,8 @@ export class EventsGateway {
   ) {
     client.leave('lobby');
     client.join(gameId);
+
+    this.logger[client.id] = gameId;
   }
 
   @SubscribeMessage('userJoinWatingRoom')
@@ -123,5 +119,11 @@ export class EventsGateway {
     const gameId = payload.gameId;
     const champion = payload.champion;
     this.server.in(gameId).emit('updateSelectedChampion', champion);
+  }
+
+  @SubscribeMessage('disconnect')
+  handleDisconnect(@ConnectedSocket() client: Socket) {
+    //유저가 가지고 있는 클라이언트 id 받음 => 해당 id를 가지고 있는 유저를 유저 리스트에서 삭제
+    this.logger[client.id] && console.log(this.logger[client.id]);
   }
 }

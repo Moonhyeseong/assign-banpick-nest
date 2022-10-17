@@ -73,7 +73,8 @@ export class GameService {
 
   //유저 리스트 업데이트
   async updateUserList(createUserDto: CreateUserDto): Promise<Game> {
-    const { gameId, userId, name, side, role, isReady } = createUserDto;
+    const { gameId, userId, clientId, name, side, role, isReady } =
+      createUserDto;
 
     const updatedData = await this.gameModel
       .findById({ _id: gameId }, (err: Error, result: IGame) => {
@@ -83,6 +84,7 @@ export class GameService {
           updatedUserList[side][ROLEDATA[role]] = {
             gameId: gameId,
             userId: userId,
+            clientId: clientId,
             name: name,
             side: side,
             role: role,
@@ -97,6 +99,7 @@ export class GameService {
           { userList: getUpdatedUserList() },
           { new: true },
           (err, result) => {
+            if (err) throw err;
             return result;
           },
         );
@@ -106,7 +109,6 @@ export class GameService {
   }
 
   //밴픽 리스트 업데이트
-
   async updateBanPickList(updateBanPickDto: UpdateBanPickDto) {
     const { gameId, banpickList, banpickCount } = updateBanPickDto;
 
