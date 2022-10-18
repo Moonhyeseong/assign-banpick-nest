@@ -7,6 +7,17 @@ type UserList = {
   red: IUser[];
 };
 
+type BanPickList = {
+  ban: {
+    blue: string[];
+    red: string[];
+  };
+  pick: {
+    blue: string[];
+    red: string[];
+  };
+};
+
 export interface IGame {
   _id: mongoose.Types.ObjectId;
   title: string;
@@ -16,7 +27,7 @@ export interface IGame {
   password: string;
   timer: boolean;
   userList: UserList;
-  banpickList: object;
+  banpickList: BanPickList;
   banpickTurnData: ITurn[];
   banpickCount: number;
   isProceeding: boolean;

@@ -134,7 +134,6 @@ export class EventsGateway {
     if (gameId !== undefined) {
       this.gameModel.findById({ _id: gameId }, (err, result: IGame) => {
         if (err) throw err;
-        console.log(result?.isProceeding);
 
         if (result?.isProceeding) {
           this.server.in(gameId).emit('shutdownSimulator', 'shutdownSimulator');
