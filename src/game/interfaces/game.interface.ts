@@ -1,5 +1,11 @@
+import { IUser } from './user.interface';
 import mongoose, { Date } from 'mongoose';
 import { ITurn } from './turn.interface';
+
+type UserList = {
+  blue: IUser[];
+  red: IUser[];
+};
 
 export interface IGame {
   _id: mongoose.Types.ObjectId;
@@ -9,7 +15,7 @@ export interface IGame {
   mode: number;
   password: string;
   timer: boolean;
-  userList: object;
+  userList: UserList;
   banpickList: object;
   banpickTurnData: ITurn[];
   banpickCount: number;

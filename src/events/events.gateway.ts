@@ -1,3 +1,4 @@
+import { IUser } from './../game/interfaces/user.interface';
 import { Server, Socket } from 'socket.io';
 import { Model } from 'mongoose';
 import { Injectable } from '@nestjs/common';
@@ -13,6 +14,11 @@ import { Game } from 'src/game/schema/game.schema';
 import { User } from 'src/user/schema/user.shcema';
 import { IGame } from './../game/interfaces/game.interface';
 import { ROLEDATA } from 'src/game/constdata';
+
+type StorageIds = {
+  gameId: string;
+  userId: string;
+};
 
 @Injectable()
 @WebSocketGateway({ transports: ['websocket'] })
@@ -49,14 +55,14 @@ export class EventsGateway {
   }
 
   @SubscribeMessage('userJoinWatingRoom')
-  handleUserJoinWatingRoom(@MessageBody() data) {
+  handleUserJoinWatingRoom(@MessageBody() data: StorageIds) {
     this.server.in(data.gameId).emit('updateGameData', data.gameId);
     this.server.in('lobby').emit('updateGameList');
     this.server.in('lobby').emit('updateGameListTest', 'updateGameListTest');
   }
 
   @SubscribeMessage('userReadyEvent')
-  async handleUserReadyEvent(@MessageBody() data) {
+  async handleUserReadyEvent(@MessageBody() data: IUser) {
     const gameId = data.gameId;
     const userId = data.userId;
 
@@ -125,71 +131,78 @@ export class EventsGateway {
   handleDisconnect(@ConnectedSocket() client: Socket) {
     const gameId = this.logger[client.id];
 
-    //유저가 가지고 있는 클라이언트 id 받음 => 해당 id를 가지고 있는 유저를 유저 리스트에서 삭제
+    if (gameId !== undefined) {
+      this.gameModel.findById({ _id: gameId }, (err, result: IGame) => {
+        if (err) throw err;
+        console.log(result?.isProceeding);
 
-    this.gameModel.findById({ _id: gameId }, (err, result) => {
-      if (result?.isProceeding) {
-        this.server.in(gameId).emit('shutdownSimulator', 'shutdownSimulator');
-        this.gameModel.deleteOne({ _id: gameId }).exec();
-        this.userModel.deleteMany({ gameId: gameId }).exec();
-      }
-
-      const updatedBlueUserListData = [];
-      const updatedRedUserListData = [];
-
-      const blueUserListData = result?.userList.blue;
-      const redUserListData = result?.userList.red;
-
-      blueUserListData?.map((user) => {
-        if (user.clientId === client.id) {
-          updatedBlueUserListData.push('');
+        if (result?.isProceeding) {
+          this.server.in(gameId).emit('shutdownSimulator', 'shutdownSimulator');
+          this.gameModel.deleteOne({ _id: gameId }).exec();
+          this.userModel.deleteMany({ gameId: gameId }).exec();
         } else {
-          updatedBlueUserListData.push(user);
+          const updatedBlueUserListData = [];
+          const updatedRedUserListData = [];
+
+          const blueUserListData = result?.userList.blue;
+          const redUserListData = result?.userList.red;
+
+          blueUserListData?.map((user) => {
+            if (user.clientId === client.id) {
+              updatedBlueUserListData.push('');
+            } else {
+              updatedBlueUserListData.push(user);
+            }
+            return updatedBlueUserListData;
+          });
+
+          redUserListData?.map((user) => {
+            if (user.clientId === client.id) {
+              updatedRedUserListData.push('');
+            } else {
+              updatedRedUserListData.push(user);
+            }
+            return updatedRedUserListData;
+          });
+
+          this.gameModel.findByIdAndUpdate(
+            { _id: gameId },
+            {
+              userList: {
+                blue: updatedBlueUserListData,
+                red: updatedRedUserListData,
+              },
+            },
+            { new: true },
+            (err, updatedData: IGame) => {
+              if (err) throw err;
+
+              //유저이탈후 참가인원 검사
+              const activeBlueTeamUsers = updatedData?.userList.blue.filter(
+                (user: any) => {
+                  return user !== '';
+                },
+              );
+              const activeRedTeamUsers = updatedData?.userList.red.filter(
+                (user: any) => {
+                  return user !== '';
+                },
+              );
+              if (
+                activeBlueTeamUsers?.length === 0 &&
+                activeRedTeamUsers?.length === 0
+              ) {
+                this.gameModel.deleteOne({ _id: gameId }).exec();
+                this.userModel.deleteMany({ game_id: gameId }).exec();
+              }
+
+              this.server.emit('updateGameList', 'updateGameList');
+              this.server.in(gameId).emit('updateGameData', gameId);
+              this.logger.delete(client.id);
+            },
+          );
         }
-        return updatedBlueUserListData;
       });
-
-      redUserListData?.map((user) => {
-        if (user.clientId === client.id) {
-          updatedRedUserListData.push('');
-        } else {
-          updatedRedUserListData.push(user);
-        }
-        return updatedRedUserListData;
-      });
-
-      this.gameModel.findByIdAndUpdate(
-        { _id: gameId },
-        {
-          userList: {
-            blue: updatedBlueUserListData,
-            red: updatedRedUserListData,
-          },
-        },
-        { new: true },
-        (err, result) => {
-          console.log(result);
-
-          //유저이탈후 참가인원 검사
-          // const activeBlueTeamUsers = result?.userList.blue.filter((user) => {
-          //   return user !== '';
-          // });
-          // const activeRedTeamUsers = result?.userList.red.filter((user) => {
-          //   return user !== '';
-          // });
-
-          // if (
-          //   activeBlueTeamUsers?.length === 0 &&
-          //   activeRedTeamUsers?.length === 0
-          // ) {
-          //   this.gameModel.deleteOne({ _id: gameId }).exec();
-          //   this.userModel.deleteMany({ game_id: gameId }).exec();
-          // }
-
-          // this.server.emit('updateGameList', 'updateGameList');
-          // this.server.in(gameId).emit('updateGameData', result);
-        },
-      );
-    });
+    }
   }
 }
