@@ -7,7 +7,7 @@ type UserList = {
   red: IUser[];
 };
 
-type BanPickList = {
+export type BanPickList = {
   ban: {
     blue: string[];
     red: string[];

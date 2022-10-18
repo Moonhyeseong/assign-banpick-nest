@@ -1,5 +1,7 @@
+import { BanPickList } from './../interfaces/game.interface';
+
 export class UpdateBanPickDto {
   gameId: string;
-  banpickList: object;
+  banpickList: BanPickList;
   banpickCount: number;
 }
