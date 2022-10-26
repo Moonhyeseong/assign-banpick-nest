@@ -29,6 +29,11 @@ export class GameController {
     return this.gameService.findAll();
   }
 
+  @Get('/champions')
+  getChampionList() {
+    return this.gameService.championList();
+  }
+
   //단일 게임 데이터 전송
   @Get(':id')
   findOne(@Param('id') id: string) {

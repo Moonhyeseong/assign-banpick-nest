@@ -136,4 +136,16 @@ export class GameService {
   removeGame(id: string) {
     return `게임 삭제 ${id}`;
   }
+
+  championList() {
+    const getChampionData = async () => {
+      const res = await fetch(
+        'https://ddragon.leagueoflegends.com/cdn/12.16.1/data/ko_KR/champion.json',
+      );
+      const ddragonCahmpionData = await res.json();
+      return ddragonCahmpionData.data;
+    };
+    console.log('get champions');
+    return getChampionData();
+  }
 }
