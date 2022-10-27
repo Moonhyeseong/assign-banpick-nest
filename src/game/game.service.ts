@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { IGame } from './interfaces/game.interface';
@@ -79,6 +79,10 @@ export class GameService {
     const updatedData = await this.gameModel
       .findById({ _id: gameId }, (err: Error, result: IGame) => {
         if (err) throw err;
+        if (result.userList[side][ROLEDATA[role]] !== '') {
+          throw new BadRequestException('error test');
+        }
+
         const getUpdatedUserList = () => {
           const updatedUserList = result.userList;
           updatedUserList[side][ROLEDATA[role]] = {
@@ -145,7 +149,7 @@ export class GameService {
       const ddragonCahmpionData = await res.json();
       return ddragonCahmpionData.data;
     };
-    console.log('get champions');
+
     return getChampionData();
   }
 }

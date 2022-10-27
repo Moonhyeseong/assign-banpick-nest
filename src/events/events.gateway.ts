@@ -23,7 +23,7 @@ type StorageIds = {
 @Injectable()
 @WebSocketGateway({ transports: ['websocket'] })
 export class EventsGateway {
-  logger: Map<string, string> = new Map();
+  userLogger: Map<string, string> = new Map();
 
   constructor(
     @InjectModel(Game.name) private readonly gameModel: Model<Game>,
@@ -51,7 +51,7 @@ export class EventsGateway {
     client.leave('lobby');
     client.join(gameId);
 
-    this.logger[client.id] = gameId;
+    this.userLogger[client.id] = gameId;
   }
 
   @SubscribeMessage('userJoinWatingRoom')
@@ -129,7 +129,7 @@ export class EventsGateway {
 
   @SubscribeMessage('disconnect')
   handleDisconnect(@ConnectedSocket() client: Socket) {
-    const gameId = this.logger[client.id];
+    const gameId = this.userLogger[client.id];
 
     if (gameId !== undefined) {
       this.gameModel.findById({ _id: gameId }, (err, result: IGame) => {
@@ -197,7 +197,7 @@ export class EventsGateway {
 
               this.server.emit('updateGameList', 'updateGameList');
               this.server.in(gameId).emit('updateGameData', gameId);
-              this.logger.delete(client.id);
+              this.userLogger.delete(client.id);
             },
           );
         }
