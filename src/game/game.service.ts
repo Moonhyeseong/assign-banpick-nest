@@ -132,15 +132,6 @@ export class GameService {
     return updateGameData;
   }
 
-  updateUserReady() {
-    return '유저 준비';
-  }
-
-  //게임 삭제
-  removeGame(id: string) {
-    return `게임 삭제 ${id}`;
-  }
-
   championList() {
     const getChampionData = async () => {
       const res = await fetch(

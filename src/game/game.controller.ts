@@ -40,12 +40,6 @@ export class GameController {
     return this.gameService.findOne(id);
   }
 
-  //게임 삭제
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.gameService.removeGame(id);
-  }
-
   //유저리스트 업데이트
   @Patch('/join')
   updateUserList(@Body() createUserDto: CreateUserDto) {
@@ -56,16 +50,5 @@ export class GameController {
   @Patch('/banpick')
   updateBanPickList(@Body() updateBanPickDto: UpdateBanPickDto) {
     return this.gameService.updateBanPickList(updateBanPickDto);
-  }
-
-  //유저 Ready
-  @Patch('/ready')
-  updateUserReady() {
-    return this.gameService.updateUserReady();
-  }
-
-  @Patch('/start/:id')
-  startGame(@Param('id') id: string) {
-    return this.gameService.removeGame(id);
   }
 }
