@@ -1,7 +1,7 @@
 import { IUser } from './../game/interfaces/user.interface';
 import { Server, Socket } from 'socket.io';
 import { Model } from 'mongoose';
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
   SubscribeMessage,
@@ -66,9 +66,12 @@ export class EventsGateway {
     const gameId = data.gameId;
     const userId = data.userId;
 
+    if (userId === undefined || gameId === undefined) {
+      throw new BadRequestException('missing id');
+    }
     //단일 게임 데이터 업데이트
     this.gameModel.findById({ _id: gameId }, (err: object, result: IGame) => {
-      if (err) throw err;
+      if (err) throw new BadRequestException(err);
 
       const getUpdatedUserList = () => {
         const updatedUserList = result.userList;
@@ -85,7 +88,7 @@ export class EventsGateway {
         { userList: getUpdatedUserList() },
         { new: true },
         (err) => {
-          if (err) throw err;
+          if (err) throw new BadRequestException(err);
           this.server.in(gameId).emit('updateGameData', gameId);
         },
       );
@@ -97,7 +100,7 @@ export class EventsGateway {
       { isReady: true },
       { new: true },
       (err) => {
-        if (err) throw err;
+        if (err) throw new BadRequestException(err);
       },
     );
   }
@@ -109,7 +112,7 @@ export class EventsGateway {
       { isProceeding: true },
       { new: true },
       (err) => {
-        if (err) throw err;
+        if (err) throw new BadRequestException(err);
         this.server.in(gameId).emit('updateGameData', gameId);
       },
     );
@@ -133,7 +136,7 @@ export class EventsGateway {
 
     if (gameId !== undefined) {
       this.gameModel.findById({ _id: gameId }, (err, result: IGame) => {
-        if (err) throw err;
+        if (err) throw new BadRequestException(err);
 
         if (result?.isProceeding) {
           this.server.in(gameId).emit('shutdownSimulator', 'shutdownSimulator');
@@ -174,7 +177,7 @@ export class EventsGateway {
             },
             { new: true },
             (err, updatedData: IGame) => {
-              if (err) throw err;
+              if (err) throw new BadRequestException(err);
 
               //유저이탈후 참가인원 검사
               const activeBlueTeamUsers = updatedData?.userList.blue.filter(

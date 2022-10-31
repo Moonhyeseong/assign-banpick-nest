@@ -1,14 +1,6 @@
 import { UpdateBanPickDto } from './dto/update-banpick.dto';
 import { CreateGameDto } from './dto/create-game.dto';
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param } from '@nestjs/common';
 import { GameService } from './game.service';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 
