@@ -28,6 +28,6 @@ export class UserService {
 
   //유저 정보 전송
   async findUser(id: string) {
-    return await this.userModel.findOne({ userId: id });
+    return await this.userModel.findOne({ userId: id }).exec();
   }
 }
