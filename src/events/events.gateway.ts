@@ -66,6 +66,8 @@ export class EventsGateway {
     const gameId = data.gameId;
     const userId = data.userId;
 
+    if (gameId === undefined) throw new BadRequestException('missing gameId');
+
     //단일 게임 데이터 업데이트
     this.gameModel.findById({ _id: gameId }, (err: object, result: IGame) => {
       if (err) throw new BadRequestException(err);
